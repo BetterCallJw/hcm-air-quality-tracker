@@ -52,8 +52,7 @@ def fetch_and_log_air_quality():
         updated_data.to_excel(file_name, index=False)
         print(f"Đã cập nhật thành công dữ liệu ngày {display_date}")
         
-        # Thêm khoảng nghỉ 5 phút (300 giây) sau khi thực thi xong
-        time.sleep(300) 
+        time.sleep(60) 
 
     except Exception as e:
         print(f"Có lỗi: {e}")
