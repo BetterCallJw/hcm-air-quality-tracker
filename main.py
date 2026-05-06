@@ -8,7 +8,7 @@ def fetch_and_log_air_quality():
     # 1. Múi giờ Việt Nam
     vn_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
     vn_time_now = datetime.now(vn_timezone)
-    yesterday = (vn_time_now - timedelta(days=1)).strftime('%Y-%m-%d')
+    yesterday = (vn_time_now - timedelta(days=1)).strftime('%d %m %Y')
 
     latitude = 10.7626
     longitude = 106.6602
