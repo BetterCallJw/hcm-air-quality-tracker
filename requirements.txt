@@ -2,4 +2,3 @@ requests
 pandas
 openpyxl
 pytz
-time
