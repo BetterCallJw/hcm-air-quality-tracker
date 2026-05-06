@@ -17,9 +17,13 @@ def fetch_and_log_air_quality():
 
     # 2. Call API
     daily_params = [
-        "european_aqi_max", "pm2_5_mean", "pm10_mean", 
-        "nitrogen_dioxide_mean", "sulphur_dioxide_mean", 
-        "carbon_monoxide_mean", "uv_index_max"
+        "european_aqi_max", 
+        "pm2_5_max", 
+        "pm10_max", 
+        "nitrogen_dioxide_max", 
+        "sulphur_dioxide_max", 
+        "carbon_monoxide_max", 
+        "uv_index_max"
     ]
     
     params_str = ",".join(daily_params)
@@ -31,7 +35,7 @@ def fetch_and_log_air_quality():
     data = response.json()
     
     if 'daily' not in data:
-        print("API trả về dữ liệu không đúng cấu trúc:", data)
+        print("Không tìm thấy dữ liệu 'daily' trong phản hồi.")
         return
 
     daily_data = data['daily']
@@ -42,9 +46,10 @@ def fetch_and_log_air_quality():
         row_data[p] = daily_data[p][0]
 
     new_data = pd.DataFrame([row_data])
+    
     new_data.columns = [
-        'Ngày', 'AQI (Max)', 'PM2.5 (Mean)', 'PM10 (Mean)', 
-        'NO2 (Mean)', 'SO2 (Mean)', 'CO (Mean)', 'UV Index (Max)'
+        'Ngày', 'AQI (Max)', 'PM2.5 (Max)', 'PM10 (Max)', 
+        'NO2 (Max)', 'SO2 (Max)', 'CO (Max)', 'UV Index (Max)'
     ]
 
     file_name = 'hcm_air_quality_log.xlsx'
