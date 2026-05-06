@@ -3,17 +3,17 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 import pytz
-import time # Thêm thư viện time
+import time
 
 def fetch_and_log_air_quality():
     # 1. Múi giờ Việt Nam
     vn_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
     vn_time_now = datetime.now(vn_timezone)
     
-    # Biến dùng để gọi API (Định dạng bắt buộc YYYY-MM-DD)
+    # Biến dùng để gọi API
     api_date = (vn_time_now - timedelta(days=1)).strftime('%Y-%m-%d')
     
-    # Biến hiển thị trong Excel (Định dạng dd MM yyyy)
+    # Biến hiển thị trong Excel
     display_date = (vn_time_now - timedelta(days=1)).strftime('%d %m %Y')
 
     latitude = 10.7626
@@ -33,7 +33,7 @@ def fetch_and_log_air_quality():
         pm25_avg = sum(pm25_list) / len(pm25_list) if pm25_list else 0
         aqi_avg = sum(aqi_list) / len(aqi_list) if aqi_list else 0
 
-        # 3. Tạo DataFrame (Sử dụng display_date)
+        # 3. Tạo DataFrame
         new_data = pd.DataFrame({
             'Ngày': [display_date],
             'AQI Trung bình': [round(aqi_avg, 2)],
@@ -42,7 +42,7 @@ def fetch_and_log_air_quality():
 
         file_name = 'hcm_air_quality_log.xlsx'
 
-        # 4. Ghi đè hoặc tạo mới Excel
+        # 4. Ghi đè, tạo mới Excel
         if os.path.exists(file_name):
             existing_data = pd.read_excel(file_name)
             updated_data = pd.concat([existing_data, new_data], ignore_index=True)
