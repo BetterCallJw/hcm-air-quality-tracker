@@ -6,43 +6,53 @@ import pytz
 import time
 
 def fetch_and_log_air_quality():
-    # 1. Múi giờ Việt Nam
+    # 1. Thiết lập múi giờ Việt Nam
     vn_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
     vn_time_now = datetime.now(vn_timezone)
     
-    # Biến dùng để gọi API
+    # Định dạng ngày cho API (YYYY-MM-DD) và Excel (dd mm yyyy)
     api_date = (vn_time_now - timedelta(days=1)).strftime('%Y-%m-%d')
-    
-    # Biến hiển thị trong Excel
     display_date = (vn_time_now - timedelta(days=1)).strftime('%d %m %Y')
 
     latitude = 10.7626
     longitude = 106.6602
 
     # 2. Call API
-    url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&hourly=pm2_5,european_aqi&start_date={api_date}&end_date={api_date}"
+    # Lấy Max cho AQI/UV và Mean cho các loại nồng độ chất
+    daily_params = [
+        "european_aqi_max",
+        "pm2_5_mean",
+        "pm10_mean",
+        "nitrogen_dioxide_mean",
+        "sulphur_dioxide_mean",
+        "carbon_monoxide_mean",
+        "uv_index_max"
+    ]
+    
+    params_str = ",".join(daily_params)
+    url = f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={latitude}&longitude={longitude}&daily={params_str}&start_date={api_date}&end_date={api_date}&timezone=Asia%2FBangkok"
     
     try:
         response = requests.get(url)
         response.raise_for_status()
-        data = response.json()
+        data = response.json()['daily']
 
-        pm25_list = [x for x in data['hourly']['pm2_5'] if x is not None]
-        aqi_list = [x for x in data['hourly']['european_aqi'] if x is not None]
+        # 3. Trích xuất dữ liệu (Chỉ lấy phần tử đầu tiên [0] vì kết quả daily trả về 1 giá trị/ngày)
+        row_data = {'Ngày': display_date}
+        for p in daily_params:
+            row_data[p] = data[p][0]
 
-        pm25_avg = sum(pm25_list) / len(pm25_list) if pm25_list else 0
-        aqi_avg = sum(aqi_list) / len(aqi_list) if aqi_list else 0
+        new_data = pd.DataFrame([row_data])
 
-        # 3. Tạo DataFrame
-        new_data = pd.DataFrame({
-            'Ngày': [display_date],
-            'AQI Trung bình': [round(aqi_avg, 2)],
-            'PM2.5 Trung bình (µg/m³)': [round(pm25_avg, 2)]
-        })
+        # Đổi tên cột cho dễ hiểu
+        new_data.columns = [
+            'Ngày', 'AQI (Max)', 'PM2.5 (Mean)', 'PM10 (Mean)', 
+            'NO2 (Mean)', 'SO2 (Mean)', 'CO (Mean)', 'UV Index (Max)'
+        ]
 
         file_name = 'hcm_air_quality_log.xlsx'
 
-        # 4. Ghi đè, tạo mới Excel
+        # 4. Ghi nối tiếp vào file Excel
         if os.path.exists(file_name):
             existing_data = pd.read_excel(file_name)
             updated_data = pd.concat([existing_data, new_data], ignore_index=True)
@@ -50,12 +60,13 @@ def fetch_and_log_air_quality():
             updated_data = new_data
 
         updated_data.to_excel(file_name, index=False)
-        print(f"Đã cập nhật thành công dữ liệu ngày {display_date}")
+        print(f"Đã cập nhật thành công dữ liệu trực tiếp ngày {display_date}")
         
+        # Khoảng nghỉ trước khi kết thúc
         time.sleep(60) 
 
     except Exception as e:
-        print(f"Có lỗi: {e}")
+        print(f"Có lỗi xảy ra: {e}")
 
 if __name__ == "__main__":
     fetch_and_log_air_quality()
