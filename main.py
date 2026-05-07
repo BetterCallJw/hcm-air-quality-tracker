@@ -35,8 +35,7 @@ def fetch_hourly_air_quality():
             'PM2.5 (µg/m³)': pm25_list
         })
 
-        # Đổi tên file để tránh nhầm lẫn với file trung bình cũ
-        file_name = 'hcm_hourly_air_quality.xlsx'
+        file_name = 'hcm_air_quality_log.xlsx'
 
         # Ghi nối tiếp 24 dòng vào file Excel
         if os.path.exists(file_name):
