@@ -39,7 +39,7 @@ def fetch_and_log_average_air_quality():
             'PM2.5 (Trung bình µg/m³)': [round(pm25_avg, 2)]
         })
 
-        file_name = 'hcm_air_quality_avg_log.xlsx'
+        file_name = 'hcm_air_quality_log.xlsx'
 
         # Ghi nối tiếp vào file
         if os.path.exists(file_name):
