@@ -49,6 +49,7 @@ def fetch_and_log_average_air_quality():
             updated_data = new_data
 
         updated_data.to_excel(file_name, index=False)
+        
         print(f"Đã tính trung bình ngày {display_date}: US AQI = {round(us_aqi_avg, 2)}, PM2.5 = {round(pm25_avg, 2)}")
 
     except Exception as e:
