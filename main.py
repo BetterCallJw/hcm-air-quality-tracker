@@ -4,14 +4,13 @@ from datetime import datetime, timedelta
 import os
 import pytz
 
-def fetch_and_log_average_air_quality():
+def fetch_hourly_air_quality():
     # 1. Khai báo múi giờ
     vn_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
     vn_time_now = datetime.now(vn_timezone)
     
     # Lấy dữ liệu của ngày hôm qua
     api_date = (vn_time_now - timedelta(days=1)).strftime('%Y-%m-%d')
-    display_date = (vn_time_now - timedelta(days=1)).strftime('%d %m %Y')
 
     latitude = 10.7626
     longitude = 106.6602
@@ -24,24 +23,23 @@ def fetch_and_log_average_air_quality():
         response.raise_for_status()
         data = response.json()
 
-        # Trích xuất đúng 24 giá trị của từng giờ
-        pm25_list = [x for x in data['hourly']['pm2_5'] if x is not None]
-        us_aqi_list = [x for x in data['hourly']['us_aqi'] if x is not None]
+        times = data['hourly']['time']
+        formatted_times = [t.replace('T', ' ') for t in times]
 
-        # 3. Tính toán giá trị trung bình cho cả 2 chỉ số
-        pm25_avg = sum(pm25_list) / len(pm25_list) if pm25_list else 0
-        us_aqi_avg = sum(us_aqi_list) / len(us_aqi_list) if us_aqi_list else 0
+        # Trích xuất toàn bộ 24 giá trị
+        pm25_list = data['hourly']['pm2_5']
+        us_aqi_list = data['hourly']['us_aqi']
 
-        # 4. Ghi dữ liệu vào DataFrame
+        # 3. DataFrame
         new_data = pd.DataFrame({
-            'Ngày': [display_date],
-            'US AQI (Trung bình)': [round(us_aqi_avg, 2)],
-            'PM2.5 (Trung bình µg/m³)': [round(pm25_avg, 2)]
+            'Thời gian': formatted_times,
+            'US AQI': us_aqi_list,
+            'PM2.5 (µg/m³)': pm25_list
         })
 
         file_name = 'hcm_air_quality_log.xlsx'
 
-        # Ghi nối tiếp vào file
+        # 4. Ghi nối tiếp vào file hoặc tạo mới
         if os.path.exists(file_name):
             existing_data = pd.read_excel(file_name)
             updated_data = pd.concat([existing_data, new_data], ignore_index=True)
@@ -50,10 +48,10 @@ def fetch_and_log_average_air_quality():
 
         updated_data.to_excel(file_name, index=False)
         
-        print(f"Đã tính trung bình ngày {display_date}: US AQI = {round(us_aqi_avg, 2)}, PM2.5 = {round(pm25_avg, 2)}")
+        print(f"Đã xuất chi tiết 24 giờ của ngày {api_date} thành công!")
 
     except Exception as e:
         print(f"Có lỗi xảy ra: {e}")
 
 if __name__ == "__main__":
-    fetch_and_log_average_air_quality()
+    fetch_hourly_air_quality()
